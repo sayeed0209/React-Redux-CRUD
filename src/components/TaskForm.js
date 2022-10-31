@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { addTask, editTask } from '../slices/task/taskSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import {
+	addTask,
+	editTask,
+	updateTask,
+	taskInputsHandler,
+} from '../slices/task/taskSlice';
+
 const TaskForm = () => {
-	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const params = useParams();
-	const { tasks } = useSelector(state => state.tasks);
 
-	const [task, setTask] = useState({
-		title: '',
-		description: '',
-	});
+	const { tasks, isEditing, task } = useSelector(state => state.tasks);
 
-	const onChangeHandler = e => {
-		setTask(prev => {
-			return { ...prev, [e.target.name]: e.target.value };
-		});
+	// const [task, setTask] = useState({
+	// 	title: taskObj.title,
+	// 	description: taskObj.description,
+	// });
+
+	const onChangeHandler = (title, des) => {
+		dispatch(taskInputsHandler({ title, description: des }));
 	};
 
 	const onSubmitHandler = e => {
@@ -27,24 +29,13 @@ const TaskForm = () => {
 			completed: false,
 		};
 		if (task.title === '' && task.description === '') return;
-		else if (params.id) {
-			dispatch(editTask(task));
+		else if (task.id) {
+			dispatch(updateTask(task));
 		} else {
 			dispatch(addTask(obj));
 		}
-		navigate('/');
-
-		setTask({
-			title: '',
-			description: '',
-		});
 	};
-	useEffect(() => {
-		if (params.id) {
-			const findTask = tasks.find(task => task.id == params.id);
-			setTask(findTask);
-		}
-	}, [params, tasks]);
+
 	return (
 		<form onSubmit={onSubmitHandler} className="bg-zinc-800 max-w-sm p-4">
 			<label htmlFor="title" className="block text-sm font-bold ms-2">
@@ -54,7 +45,9 @@ const TaskForm = () => {
 				type="text"
 				placeholder="title"
 				value={task.title}
-				onChange={onChangeHandler}
+				onChange={e => {
+					onChangeHandler(e.target.value, task.description);
+				}}
 				name="title"
 				className="w-full p-2 rounded-md bg-zinc-600 mb-2 "
 			/>
@@ -67,12 +60,16 @@ const TaskForm = () => {
 				cols="30"
 				rows="10"
 				value={task.description}
-				onChange={onChangeHandler}
+				onChange={e => {
+					onChangeHandler(task.title, e.target.value);
+				}}
 				className="w-full p-2 rounded-md bg-zinc-600 mb-2 "
 			>
 				{task.description}
 			</textarea>
-			<button className="bg-blue-500 px-4 py-1 rounded-md ">{'Save'}</button>
+			<button className="bg-blue-500 px-4 py-1 rounded-md ">
+				{isEditing ? 'update' : 'Save'}
+			</button>
 		</form>
 	);
 };

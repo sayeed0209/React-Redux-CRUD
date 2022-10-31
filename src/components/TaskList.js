@@ -1,13 +1,21 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteTask, editTask } from '../slices/task/taskSlice';
+import {
+	deleteTask,
+	editTask,
+	showEditing,
+	updateTask,
+} from '../slices/task/taskSlice';
 import { Link } from 'react-router-dom';
 const TaskList = () => {
-	const { tasks } = useSelector(state => state.tasks);
+	const { tasks, isEditing } = useSelector(state => state.tasks);
 	const dispatch = useDispatch();
 
 	const deleteTaskHandler = id => {
 		dispatch(deleteTask(id));
+	};
+	const editTaskHandler = task => {
+		dispatch(editTask(task));
 	};
 
 	return (
@@ -34,12 +42,18 @@ const TaskList = () => {
 									<p>{task.description}</p>
 								</div>
 								<div className="flex gap-4 mt-3">
-									<Link
+									{/* <Link
 										to={`/edit-task/${task.id}`}
-										className="bg-blue-500 px-2 py-1 rounded-md "
+										
 									>
 										Edit
-									</Link>
+									</Link> */}
+									<button
+										className="bg-blue-500 px-2 py-1 rounded-md "
+										onClick={() => editTaskHandler(task)}
+									>
+										Edit
+									</button>
 									<button
 										onClick={() => deleteTaskHandler(task.id)}
 										className="bg-red-500 px-2 py-1 rounded-md "
